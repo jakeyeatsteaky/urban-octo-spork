@@ -1,5 +1,5 @@
 build_and_run:
-	g++ -std=c++17 -Wall -g ./*.cpp -o jake_gl
+	g++ -std=c++17 -Wall -g main.cpp -o jake_gl
 	./jake_gl
 
 clean:
