@@ -11,8 +11,10 @@ static uint32_t pixels[WIDTH * HEIGHT];
 void jgl_fill(uint32_t* pixels, size_t width, size_t height, uint32_t color)
 {
 
-    for(size_t i = 0; i < width*height; ++i) {
-        pixels[i] = color;                              // fill a buffer with color data;
+    for(size_t y = 0; y < height; ++y) {
+        for(size_t x = 0; x < width; ++x) {
+            pixels[y * width + x] = color;
+        }
     }
 }
 
@@ -44,10 +46,10 @@ Errno jgl_save_to_ppm(uint32_t* pixels, size_t width, size_t height, const char*
         for(size_t i = 0; i < width*height; ++i) {      // iterate through the buffer and write pixel data
                                                         // 0xAABBGGRR -> RGB configuration 32 bit
             uint32_t pixel = pixels[i];
-            uint32_t bytes[3] = {
-                (pixel << 8*0) & 0xFF,                  // shift by 0 bytes to extract only RR of 0xAABBGGRR
-                (pixel << 8*1) & 0xFF,                  // shift by 1 byte to extract only GG of 0xAABBGGRR
-                (pixel << 8*2) & 0xFF                   // shift by 2 bytes to extract only BB of 0xAABBGGRR
+            uint8_t bytes[3] = {
+                (pixel >> (8*0)) & 0xFF,                  // shift by 0 bytes to extract only RR of 0xAABBGGRR
+                (pixel >> (8*1)) & 0xFF,                  // shift by 1 byte to extract only GG of 0xAABBGGRR
+                (pixel >> (8*2)) & 0xFF                   // shift by 2 bytes to extract only BB of 0xAABBGGRR
             };          
             fwrite(bytes, sizeof(bytes), 1, f);
             if(ferror(f)) return_defer(errno);
@@ -63,7 +65,7 @@ defer:
 
 int main(void) 
 {
-    jgl_fill(pixels, WIDTH, HEIGHT, 0xFF0000FF);
+    jgl_fill(pixels, WIDTH, HEIGHT, 0xFF23F4AC);    // 0xAABBGGRR
     jgl_save_to_ppm(pixels, WIDTH, HEIGHT, "output.ppm");
 }
 
