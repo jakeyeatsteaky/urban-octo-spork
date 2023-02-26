@@ -85,7 +85,7 @@ void jgl_make_checker_board(uint32_t* pixels, size_t pixels_width, size_t pixels
 int main(void) 
 {
     const char* file_path = "output.ppm";
-    jgl_fill(pixels, WIDTH, HEIGHT, 0xFF000000);    // 0xAABBGGRR
+    jgl_fill(pixels, WIDTH, HEIGHT, 0xFF202020);    // 0xAABBGGRR
     size_t rect_w = 200*2.5;
     size_t rect_h = 200*2.5;
     size_t cb_w = 450;
