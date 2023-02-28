@@ -13,6 +13,11 @@ void jgl_fill_rect(uint32_t* pixels, size_t pixels_width, size_t pixels_height, 
 void jgl_fill_rect_center(uint32_t* pixels, size_t pixels_width, size_t pixels_height, int x0, int y0, size_t w, size_t h, uint32_t color);
 void jgl_make_checker_board(uint32_t* pixels, size_t pixels_width, size_t pixels_height, int x0, int y0, size_t cb_w, size_t cb_h, uint32_t color1, uint32_t color2, int grid);
 void jgl_make_checker_board2(uint32_t* pixels, size_t pixels_width, size_t pixels_height, uint32_t color1, uint32_t color2, size_t rows, size_t cols);
+void jgl_fill_circle(uint32_t* pixels, size_t pixels_width, size_t pixels_height, int c_x, int c_y, size_t radius, uint32_t color);
+void jgl_fill_triangle(uint32_t* pixels, size_t pixels_width, size_t pixels_height, size_t base, size_t height, int c_x, int c_y, uint32_t color);
+void jgl_circle_grid(uint32_t* pixels, size_t pixels_width, size_t pixels_height, uint32_t color, size_t radius);
+float lerpf(float a, float b, float t);
+void jgl_circle_gradient(uint32_t* pixels, size_t pixels_width, size_t pixels_height, uint32_t color, size_t radius);
 
 
 
@@ -155,6 +160,86 @@ void jgl_make_checker_board2(uint32_t* pixels, size_t pixels_width, size_t pixel
             jgl_fill_rect(pixels, pixels_width, pixels_height, x*cell_width, y*cell_height, cell_width, cell_height, color);
         }
     } 
+}
+
+void jgl_fill_circle(uint32_t* pixels, size_t pixels_width, size_t pixels_height, int c_x, int c_y, size_t radius, uint32_t color)
+{
+    int x1 = c_x - static_cast<int>(radius);
+    int y1 = c_y - static_cast<int>(radius);
+    int x2 = c_x + static_cast<int>(radius);
+    int y2 = c_y + static_cast<int>(radius);
+
+    for(int y = y1; y <= y2; ++y) {
+        if(0 <= y && y < (int)pixels_height){
+            for(int x = x1; x <= x2; ++x) {
+                if(0 <= x && x < (int)pixels_width){
+                    int x_dist_frm_center = x - c_x;
+                    int y_dist_frm_center = y - c_y;
+                    if(x_dist_frm_center*x_dist_frm_center + y_dist_frm_center*y_dist_frm_center <= radius*radius)
+                        pixels[y * pixels_width + x] = color;
+                }
+            }
+        }
+    }
+
+} 
+
+void jgl_fill_triangle(uint32_t* pixels, size_t pixels_width, size_t pixels_height, size_t base, size_t height, int c_x, int c_y, uint32_t color) 
+{
+    for(int y = 0; y < height; ++y) {
+        if(0 <= y && y < (int)pixels_height){
+            for(int x = 0; x < base; ++x) {
+                if(0 <= x && x < (int)pixels_width){
+                    int dx = x+c_x;
+                    int dy = y + c_y;
+                    if(y <= x)
+                        pixels[dy*pixels_width+dx] = color;
+                }
+            }
+        }
+    }
+}
+
+void jgl_circle_grid(uint32_t* pixels, size_t pixels_width, size_t pixels_height, uint32_t color, size_t radius)
+{
+    int rows = 6;
+    int cols = 8;
+    int cell_width = pixels_width / cols;
+    int cell_height = pixels_height / rows;
+
+    for(int y = 0; y < rows; ++y) {
+        for(int x = 0; x < cols; ++x) {
+            size_t radius = cell_width;
+            if(cell_height < radius) radius = cell_height;
+            jgl_fill_circle(pixels, pixels_width, pixels_height, x*cell_width + cell_width/2, y*cell_height + cell_height/2, radius/2, color);
+        }
+    }
+}
+
+float lerpf(float a, float b, float t)
+{
+    return a + (b-a)*t;
+}
+
+void jgl_circle_gradient(uint32_t* pixels, size_t pixels_width, size_t pixels_height, uint32_t color, size_t radius)
+{
+    int rows = 6;
+    int cols = 8;
+    int cell_width = pixels_width / cols;
+    int cell_height = pixels_height / rows;
+
+    for(int y = 0; y < rows; ++y) {
+        for(int x = 0; x < cols; ++x) {
+
+            float u = (float) x/cols;
+            float v = (float) y/rows;
+            float t = (u+v)/2;
+
+            size_t radius = cell_width;
+            if(cell_height < radius) radius = cell_height;
+            jgl_fill_circle(pixels, pixels_width, pixels_height, x*cell_width + cell_width/2, y*cell_height + cell_height/2, lerpf(radius/8, radius/2, t), color);
+        }
+    }
 }
 
 #endif
